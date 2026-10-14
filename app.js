@@ -38,6 +38,83 @@ document.addEventListener('click', (event) => {
 const desktopQuery = matchMedia('(min-width:951px)');
 desktopQuery.addEventListener('change', (event) => { if (event.matches) closeMenu(); });
 
+// Keep the rainy setting still while the page content slides between sections.
+const pageMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const pageSurfaces = selectAll('main, .site-footer');
+let pageAnimations = [];
+let pendingPage = null;
+function clearPageMotion() {
+  const previousAnimations = pageAnimations;
+  pageAnimations = [];
+  previousAnimations.forEach((animation) => animation.cancel());
+  document.documentElement.classList.remove('page-transition-active');
+  document.body.classList.remove('page-transition-leaving');
+}
+function canAnimatePage() {
+  return !pageMotion.matches && pageSurfaces.length > 0 &&
+    typeof pageSurfaces[0].animate === 'function';
+}
+function enterPage() {
+  pendingPage = null;
+  clearPageMotion();
+  if (document.body.classList.contains('entry-locked') || !canAnimatePage()) return;
+  document.documentElement.classList.add('page-transition-active');
+  const animations = pageSurfaces.map((surface) => surface.animate([
+    { opacity: 0, transform: 'translate3d(22px, 0, 0)' },
+    { opacity: 1, transform: 'translate3d(0, 0, 0)' }
+  ], { duration: 460, easing: 'cubic-bezier(.22, 1, .36, 1)' }));
+  pageAnimations = animations;
+  Promise.all(animations.map((animation) => animation.finished.catch(() => {}))).then(() => {
+    if (pageAnimations !== animations) return;
+    clearPageMotion();
+  });
+}
+function pagePath(pathname) {
+  return pathname.replace(/\/index(?:\.html)?\/?$/, '/')
+    .replace(/\.html$/, '').replace(/\/$/, '') || '/';
+}
+document.addEventListener('hari-entry-accepted', enterPage);
+document.addEventListener('click', (event) => {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey ||
+      event.shiftKey || event.altKey) return;
+  const link = event.target.closest('a[href]');
+  if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+  const destination = new URL(link.href, location.href);
+  if (destination.origin !== location.origin || !/^https?:$/.test(destination.protocol)) return;
+  if (!/(?:\/(?:index|hari|world|images)(?:\.html)?|\/)\/?$/.test(destination.pathname)) return;
+  if (pagePath(destination.pathname) === pagePath(location.pathname) &&
+      destination.search === location.search) return;
+  if (document.body.classList.contains('entry-locked') || !canAnimatePage()) return;
+  event.preventDefault();
+  if (pendingPage) return;
+  pendingPage = destination.href;
+  closeMenu();
+  const currentFrames = pageSurfaces.map((surface) => {
+    const style = getComputedStyle(surface);
+    return { opacity: style.opacity, transform: style.transform };
+  });
+  clearPageMotion();
+  document.documentElement.classList.add('page-transition-active');
+  document.body.classList.add('page-transition-leaving');
+  const animations = pageSurfaces.map((surface, index) => surface.animate([
+    currentFrames[index],
+    { opacity: 0, transform: 'translate3d(-18px, 0, 0)' }
+  ], { duration: 220, easing: 'cubic-bezier(.4, 0, .6, 1)', fill: 'forwards' }));
+  pageAnimations = animations;
+  Promise.all(animations.map((animation) => animation.finished.catch(() => {}))).then(() => {
+    if (pageAnimations === animations && pendingPage) location.assign(pendingPage);
+  });
+});
+addEventListener('pagehide', () => { pendingPage = null; clearPageMotion(); });
+addEventListener('pageshow', (event) => { if (event.persisted) enterPage(); });
+pageMotion.addEventListener('change', () => {
+  if (!pageMotion.matches) return;
+  const destination = pendingPage;
+  pendingPage = null;
+  clearPageMotion();
+  if (destination) location.assign(destination);
+});
+
 const progressBar = select('.reading-progress span');
 let scrollQueued = false;
 function updateReadingProgress() {

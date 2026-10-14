@@ -1,6 +1,8 @@
 :root{color-scheme:dark;--paper:#fff0d8;--text:#dce5e9;--muted:#afbfca;--ink:#0f2428;--line:rgba(199,217,209,.18);--accent:#afd5ea;--sans:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:110px}
+html.page-transition-active{overflow-x:clip}
+.page-transition-leaving main,.page-transition-leaving .site-footer{pointer-events:none}
 body{margin:0;background:var(--ink);color:var(--text);font:400 15px/1.95 var(--sans);word-break:keep-all;overflow-wrap:break-word}
 body.dialog-open{overflow:hidden}
 button,a{-webkit-tap-highlight-color:transparent}
