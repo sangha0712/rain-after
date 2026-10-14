@@ -189,7 +189,7 @@ soundButton?.addEventListener('click', async () => {
     audioContext = null;
     rainSource = null;
     rainGain = null;
-    notify('빗소리를 불러오지 못했어요. 다시 눌러 주세요.');
+    notify('빗소리 불러오기 실패. 버튼을 다시 누르면 재시도.');
   }
   finally { soundBusy = false; }
 });

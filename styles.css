@@ -366,3 +366,7 @@ body{font-size:17px;line-height:1.9}
  .home-hero h1 span{color:transparent;-webkit-text-fill-color:transparent}
  .home-menu strong,.section-heading h1,.section-heading h2,.world-feature h3,.world-notes h3,.past-timeline h3,.habits-heading h3,.state-heading h3{width:fit-content;background:linear-gradient(110deg,#dedacf 0%,#c7cecb 55%,#adbec0 100%);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
 }
+
+/* Details start with the profile fields after removing the introduction. */
+.detail-page .hari-layout{display:block}
+.detail-page .hari-text>.profile-facts{margin-top:0}

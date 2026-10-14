@@ -47,7 +47,7 @@ if (gallery) {
         image.remove();
         const fallback=document.createElement('span');
         fallback.className='missing-image';
-        fallback.textContent='등록된 이미지를 불러오지 못했습니다.';
+        fallback.textContent='등록된 이미지 불러오기 실패.';
         button.append(fallback);
       });
       button.append(image);
@@ -76,7 +76,7 @@ if (gallery) {
     document.querySelectorAll('[data-outfit]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));
     render();
   }));
-  fetch('gallery-data.json').then(response=>{if(!response.ok)throw new Error('Gallery data failed');return response.json();}).then(data=>{records=data;render();}).catch(()=>{gallery.textContent='이미지 목록을 불러오지 못했습니다. 페이지를 새로고침해 주세요.';});
+  fetch('gallery-data.json').then(response=>{if(!response.ok)throw new Error('Gallery data failed');return response.json();}).then(data=>{records=data;render();}).catch(()=>{gallery.textContent='이미지 목록 불러오기 실패. 새로고침 후 재시도.';});
   document.querySelector('#close-image').addEventListener('click',()=>imageDialog.close());
   imageDialog.addEventListener('close',()=>document.body.classList.remove('dialog-open'));
 }
