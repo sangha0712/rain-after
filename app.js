@@ -2,6 +2,37 @@
 
 const select = (selector) => document.querySelector(selector);
 const selectAll = (selector) => [...document.querySelectorAll(selector)];
+
+// A restored or long-open page checks the current deployment before staying stale.
+const loadedSiteVersion = select('meta[name="site-version"]')?.content;
+let versionCheckPending = false;
+let lastVersionCheck = 0;
+async function checkSiteVersion(force = false) {
+  if (!loadedSiteVersion || document.visibilityState === 'hidden' || versionCheckPending ||
+      (!force && Date.now() - lastVersionCheck < 30000)) return;
+  versionCheckPending = true;
+  lastVersionCheck = Date.now();
+  try {
+    const response = await fetch('site-version.json', { cache: 'no-store' });
+    if (!response.ok) return;
+    const { version } = await response.json();
+    if (!/^[a-f0-9]{16}$/.test(version) || version === loadedSiteVersion) return;
+    const destination = new URL(location.href);
+    // A second mismatch means the network is inconsistent; avoid a reload loop.
+    if (destination.searchParams.get('v') === version) return;
+    destination.searchParams.set('v', version);
+    location.replace(destination.href);
+  } catch {
+    // Keep the current page usable when the visitor is offline.
+  } finally {
+    versionCheckPending = false;
+  }
+}
+addEventListener('pageshow', () => checkSiteVersion(true));
+addEventListener('online', () => checkSiteVersion(true));
+document.addEventListener('visibilitychange', () => checkSiteVersion());
+setInterval(checkSiteVersion, 60000);
+
 const toast = select('#toast');
 let toastTimer;
 function notify(message) {
