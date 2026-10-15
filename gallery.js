@@ -23,6 +23,19 @@ function acceptEntry() {
 }
 document.querySelector('#accept-entry').addEventListener('click',acceptEntry);
 entryDialog.addEventListener('cancel',event=>event.preventDefault());
+
+// Reserve reading space before each comic image loads and expose the source on failure.
+document.querySelectorAll('.webtoon-panel img[data-src]').forEach((image) => {
+  image.addEventListener('load', () => {
+    image.width = image.naturalWidth;
+    image.height = image.naturalHeight;
+  });
+  image.addEventListener('error', () => {
+    image.hidden = true;
+    image.closest('.webtoon-panel').querySelector('.webtoon-image-fallback').hidden = false;
+  });
+});
+
 if (entryAccepted) acceptEntry(); else entryDialog.showModal();
 
 const gallery = document.querySelector('#image-gallery');

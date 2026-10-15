@@ -81,7 +81,7 @@ document.addEventListener('click', (event) => {
   if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
   const destination = new URL(link.href, location.href);
   if (destination.origin !== location.origin || !/^https?:$/.test(destination.protocol)) return;
-  if (!/(?:\/(?:index|hari|world|images)(?:\.html)?|\/)\/?$/.test(destination.pathname)) return;
+  if (!/(?:\/(?:index|hari|world|images|webtoon)(?:\.html)?|\/)\/?$/.test(destination.pathname)) return;
   if (pagePath(destination.pathname) === pagePath(location.pathname) &&
       destination.search === location.search) return;
   if (document.body.classList.contains('entry-locked') || !canAnimatePage()) return;
